@@ -120,17 +120,20 @@ router.patch("/task", authentication, async (req, res) => {
 
 router.delete("/task/:id", authentication, async (req, res) => {
   let _id = req.params.id;
+
   try {
     let result = await task.findOneAndDelete({ _id, userId: req.user._id });
 
     if (!result) {
-      return res.status(404).send();
+      console.log(result);
+      return res.status(404).send({ Message: "No task " });
     }
+
     return res.send(result);
   } catch (e) {
     return res.status(404).send(e);
   }
 });
 
-router.delete("/task", authentication, async (req, res) => {});
+//router.delete("/task", authentication, async (req, res) => {});
 module.exports = router;
