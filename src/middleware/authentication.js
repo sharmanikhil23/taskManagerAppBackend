@@ -4,6 +4,7 @@ const user = require("../db/models/usersModel");
 const authentication = async (req, res, next) => {
   try {
     let token = req.header("Authorization").replace("Bearer ", "");
+
     let verifyToken = jwt.verify(token, process.env.JWT_SECRETTOKEN);
 
     let findingUser = await user.findOne({

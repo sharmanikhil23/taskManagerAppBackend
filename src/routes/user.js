@@ -5,6 +5,7 @@ const authentication = require("../middleware/authentication");
 const multer = require("multer");
 const sharp = require("sharp");
 const emailing = require("../emailing/account");
+
 const upload = multer({
   limits: {
     fileSize: 1000000,
@@ -71,17 +72,21 @@ router.get("/user/:id/avatar", async (req, res) => {
   }
 });
 
+/**
+ * This is used to login as the user
+ */
 router.post("/users", async (req, res) => {
   const newUser = new user(req.body);
   try {
     let result = await newUser.save();
+
     const newUserToken = await newUser.authenticationToken();
 
-    emailing.creatingNewUser(result.email, result.name);
-    // console.log("called 3");
+    //emailing.creatingNewUser(result.email, result.name);
+
     return res.status(201).send({ user: result.result(), token: newUserToken });
   } catch (e) {
-    res.status(404).send(e);
+    res.status(400).send(e);
   }
 });
 
@@ -102,7 +107,7 @@ router.patch("/users/me", authentication, async (req, res) => {
 
   try {
     let userFound = req.user;
-    console.log(userFound);
+
     gettingUpdates.forEach((update) => {
       userFound[update] = req.body[update];
     });
@@ -152,7 +157,7 @@ router.post("/user/logout", authentication, async (req, res) => {
       return tokens.token != req.token;
     });
     await req.user.save();
-    res.send({ result: "You are logged out" });
+    res.status(200).send({ result: "You are logged out" });
   } catch (e) {
     res.status(404).send({ Error: "Please login first" });
   }
@@ -177,4 +182,5 @@ router.delete("/user", authentication, async (req, res) => {
     return res.status(500).send();
   }
 });
+
 module.exports = router;

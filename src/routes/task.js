@@ -27,7 +27,6 @@ router.get("/tasks", authentication, async (req, res) => {
 
     sort.created = parts[1] === "desc" ? 1 : 0;
   }
-  console.log(sort);
 
   try {
     //new advanced way to find all the tasks made by this user
@@ -40,13 +39,16 @@ router.get("/tasks", authentication, async (req, res) => {
       },
       sort,
     });
+
     res.send(req.user.tasks);
   } catch (e) {
-    console.log(e);
     res.status(500).send("Error");
   }
 });
 
+/**
+ * This is used to get the particular task by the particular is
+ */
 router.get("/tasks/:id", authentication, async (req, res) => {
   let taskId = req.params.id;
 
@@ -61,8 +63,15 @@ router.get("/tasks/:id", authentication, async (req, res) => {
   }
 });
 
-router.post("/tasks", authentication, async (req, res) => {
+/**
+ * This is used to add the task
+ */
+router.post("/tasks/:id", authentication, async (req, res) => {
+  if (!req.body) {
+    return res.send(404).send({ ERROR: "Please provide the description" });
+  }
   const newTask = new task({ ...req.body, userId: req.user._id });
+
   try {
     let task = await newTask.save();
     return res.status(201).send(task);
@@ -71,7 +80,10 @@ router.post("/tasks", authentication, async (req, res) => {
   }
 });
 
-router.patch("/tasks/:id", authentication, async (req, res) => {
+/**
+ * This is used to update some particular task
+ */
+router.patch("/task", authentication, async (req, res) => {
   let incomingUpdates = Object.keys(req.body);
   let allowedUpdates = ["description", "completed"];
 
@@ -87,12 +99,11 @@ router.patch("/tasks/:id", authentication, async (req, res) => {
 
   try {
     let result = await task.findOne({
-      _id: req.params.id,
+      _id: req.query.id,
       userId: req.user._id,
     });
 
     incomingUpdates.forEach((update) => {
-      console.log(update);
       result[update] = req.body[update];
     });
     await result.save();
