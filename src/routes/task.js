@@ -125,7 +125,6 @@ router.delete("/task/:id", authentication, async (req, res) => {
     let result = await task.findOneAndDelete({ _id, userId: req.user._id });
 
     if (!result) {
-      console.log(result);
       return res.status(404).send({ Message: "No task " });
     }
 
